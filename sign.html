@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signature</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="icon" href="pen.png">
+</head>
+
+<body class="flex items-center justify-center min-h-screen bg-gray-100">
+    
+    <div class="bg-white shadow-md rounded p-8">
+        <h1 class="m-8 p-4 text-8xl text-center font-agustina font-style: italic;">Signature</h1>
+        <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="flex flex-col items-center">
+                <label class="text-gray-700 mb-2">Text color picker</label>
+                <input class="form-control w-24 h-10 border rounded" type="color" id="colorPicker">
+            </div>
+
+            <div class="flex flex-col items-center">
+                <label class="text-gray-700 mb-2">Background</label>
+                <input class="form-control w-24 h-10 border rounded" type="color" id="canvasColor">
+            </div>
+
+            <div class="flex flex-col items-center">
+                <label class="text-gray-700 mb-2">Font size</label>
+                <select class="custom-select w-24 h-10 border rounded" id="fontSizePicker">
+                    <option value="5">5px</option>
+                    <option value="10">10px</option>
+                    <option value="20">20px</option>
+                    <option value="30">30px</option>
+                    <option value="40">40px</option>
+                    <option value="50">50px</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="flex justify-center mb-6">
+            <button class="btn btn-primary bg-blue-500 text-white py-2 px-4 rounded" id="applyButton">Apply</button>
+        </div>
+
+        <div class="flex justify-center mb-6">
+            <canvas class="border-2 border-gray-300 rounded" id="myCanvas" width="800" height="500"></canvas>
+        </div>
+
+        <div class="flex justify-center space-x-4">
+            <button class="btn btn-danger bg-red-500 text-white py-2 px-4 rounded" id="clearButton">Clear</button>
+            <button class="btn btn-success bg-green-500 text-white py-2 px-4 rounded" id="saveButton">Save & download</button>
+            <button class="btn btn-warning bg-yellow-500 text-white py-2 px-4 rounded" id="retrieveButton">Retrieve saved signature</button>
+        </div>
+    </div>
+
+    <script>
+        let history = [];
+
+        const colorPicker = document.getElementById('colorPicker');
+        const canvasColor = document.getElementById('canvasColor');
+        const canvas = document.getElementById('myCanvas');
+        const clearButton = document.getElementById('clearButton');
+        const saveButton = document.getElementById('saveButton');
+        const fontSizePicker = document.getElementById('fontSizePicker');
+        const applyButton = document.getElementById('applyButton');
+
+        const ctx = canvas.getContext('2d');
+
+        applyButton.addEventListener('click', () => {
+            ctx.fillStyle = colorPicker.value;
+            ctx.strokeStyle = colorPicker.value;
+            ctx.fillStyle = canvasColor.value;
+            ctx.fillRect(0, 0, 800, 500);
+            ctx.lineWidth = fontSizePicker.value;
+        });
+
+        canvas.addEventListener('mousedown', (event) => {
+            isDrawing = true;
+            lastX = event.offsetX;
+            lastY = event.offsetY;
+        });
+
+        canvas.addEventListener('mousemove', (event) => {
+            if (isDrawing) {
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(event.offsetX, event.offsetY);
+                ctx.stroke();
+
+                lastX = event.offsetX;
+                lastY = event.offsetY;
+            }
+        });
+
+        canvas.addEventListener('contextmenu', (event) => {
+            event.preventDefault();
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDrawing = false;
+        });
+
+        clearButton.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+
+        saveButton.addEventListener('click', () => {
+            localStorage.setItem('canvasContents', canvas.toDataURL());
+            let link = document.createElement('a');
+            link.download = 'my-canvas.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+
+        retrieveButton.addEventListener('click', () => {
+            let savedCanvas = localStorage.getItem('canvasContents');
+            if (savedCanvas) {
+                let img = new Image();
+                img.src = savedCanvas;
+                ctx.drawImage(img, 0, 0);
+            }
+        });
+    </script>
+</body>
+
+</html>
